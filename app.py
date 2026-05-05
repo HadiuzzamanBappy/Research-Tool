@@ -3,16 +3,62 @@ import time
 import streamlit as st
 
 from agent.agent import create_agent
+from agent.prompt import detect_input_type
 from main import _extract_text, _render_report_html
 
 
 st.set_page_config(page_title="Market Researcher", page_icon="📊", layout="wide")
 
 st.title("Research tool")
-st.caption("Generate an investment memo for a company using Z.ai GLM-5 + web research tools.")
+st.caption("Research companies, topics, URLs, and general inputs with live web research tools.")
 
-company = st.text_input("Company name", placeholder="e.g. Microsoft")
-run = st.button("Run Research", type="primary")
+col_sel, col_input, col_run = st.columns([1, 6, 1])
+with col_sel:
+    selection = st.selectbox(
+        "Input type",
+        options=["Auto", "Company", "URL", "Topic", "How to"],
+        index=0,
+        help="Choose how to interpret the input. 'Auto' will detect type automatically.",
+    )
+
+with col_input:
+    if selection == "Auto":
+        placeholder = "e.g. Microsoft, https://example.com/article, a short topic, or a product"
+    elif selection == "Company":
+        placeholder = "e.g. Microsoft Corporation, Tesla, Amazon"
+    elif selection == "URL":
+        placeholder = "e.g. https://example.com/article-or-page"
+    elif selection == "Topic":
+        placeholder = "e.g. electric vehicles, market sizing, fintech trends"
+    elif selection == "How to":
+        placeholder = "e.g. how to cook rice, how to create a battery"
+    else:
+        placeholder = "Enter what you want researched"
+
+    company = st.text_input("What should the agent research?", placeholder=placeholder)
+
+with col_run:
+    st.markdown(
+        """
+        <style>
+        div.stVerticalBlock {
+            display: flex;
+            justify-content: flex-end;
+            width: 100%;
+        }
+        div.stButton > button {
+            box-shadow: 0 0 10px rgba(0,150,255,0.45);
+            transition: box-shadow 0.18s ease-in-out, transform 0.08s;
+        }
+        div.stButton > button:hover {
+            box-shadow: 0 0 22px rgba(0,150,255,0.75);
+            transform: translateY(-1px);
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+    run = st.button("Run Research", type="primary")
 
 if "thinking_text" not in st.session_state:
     st.session_state.thinking_text = ""
@@ -35,10 +81,10 @@ def _stream_with_split(agent, prompt: str):
     Yields tuples: (chunk_text, is_final)
     is_final=True when we've crossed the report start marker.
     """
-    final_marker = re.compile(r'(#\s*Investment Memo\b|##\s*1\.?\s*Company Overview\b)', re.I)
+    final_marker = re.compile(r"#{1,3}\s+", re.I)
     seen_marker = False
     full_response = ""
-    
+
     for event in agent.stream({"messages": [("user", prompt)]}, stream_mode="messages"):
         chunk = event[0] if isinstance(event, tuple) else event
         chunk_text = getattr(chunk, "content", "")
@@ -52,37 +98,31 @@ def _stream_with_split(agent, prompt: str):
         if not chunk_text:
             continue
 
-        # Normalize invisible characters only
         chunk_text = chunk_text.replace("\u200b", "").replace("\ufeff", "")
-        
+
         previous_length = len(full_response)
         full_response += chunk_text
 
-        # Detect the first complete report marker across the full accumulated stream.
         if not seen_marker:
             match = final_marker.search(full_response)
             if match:
                 seen_marker = True
                 split_index = match.start()
 
-                # Emit any newly arrived thinking text before the marker.
                 if split_index > previous_length:
                     thinking_part = full_response[previous_length:split_index]
                     if thinking_part:
                         yield thinking_part, False
 
-                # Emit the result starting exactly at the memo heading.
                 result_part = full_response[split_index:]
                 if result_part:
                     yield result_part, True
                 continue
 
-        # Stream everything - thinking until the marker is found, then result.
         yield chunk_text, seen_marker
 
 
 def _typewriter(text: str):
-    """Yield text one character at a time for a chat-like typing effect."""
     for character in text:
         yield character
         time.sleep(0.002)
@@ -97,9 +137,12 @@ if run:
             st.session_state.result_text = ""
             st.session_state.report_html = ""
 
-            agent = create_agent()
+            profile = selection.lower() if selection != "Auto" else detect_input_type(company)
+            if profile == "how to":
+                profile = "howto"
+            agent = create_agent(company, profile)
 
-            st.info("🔍 Researching...")
+            st.info(f"🔍 Researching ({profile})...")
 
             try:
                 thinking_text = ""

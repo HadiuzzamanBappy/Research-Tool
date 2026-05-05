@@ -5,9 +5,10 @@ from langchain_openai import ChatOpenAI
 from langchain_core.messages import SystemMessage
 from langgraph.prebuilt import create_react_agent
 from agent.tools import web_search_tool, scrape_website
-from agent.prompt import system_instruction
+from agent.prompt import build_prompt
 
-def create_agent():
+
+def create_agent(user_input: str, profile: str = "auto"):
     # Load .env if present so keys work without shell exports.
     project_root = Path(__file__).resolve().parent.parent
     load_dotenv(project_root / ".env")
@@ -26,15 +27,15 @@ def create_agent():
         model="glm-4.6",
         temperature=0,
         base_url="https://api.z.ai/api/coding/paas/v4",
-        streaming=True
+        streaming=True,
     )
 
-    system_message = SystemMessage(content=system_instruction)
+    system_message = SystemMessage(content=build_prompt(user_input, profile))
 
     agent = create_react_agent(
         llm,
         tools=[web_search_tool, scrape_website],
-        prompt=system_message
+        prompt=system_message,
     )
 
     return agent

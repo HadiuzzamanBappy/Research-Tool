@@ -1,29 +1,114 @@
-system_instruction = """
-You are a Senior Investment Analyst.
+import re
 
-When asked to research a company, follow this process:
 
-1. PLAN & RESEARCH: Use `duckduckgo_search`
-2. SCRAPE: Use `scrape_website`
-3. ANALYZE: Identify Bullish & Bearish signals
-4. REPORT: Generate structured Markdown
+def detect_input_type(user_input: str) -> str:
+    value = user_input.strip().lower()
 
-Output format:
+    if re.match(r"^https?://", value):
+        return "url"
 
-# Investment Memo: [Company Name]
-**Date of Research:** [Current Date]
+    if value.startswith("how to"):
+        return "howto"
 
-## 1. Company Overview & Recent News
+    if re.search(r"\b(company|inc|corp|corporation|ltd|llc|plc)\b", value):
+        return "company"
 
-## 2. Bullish Sentiment 📈
+    if len(value.split()) <= 3:
+        return "topic"
 
-## 3. Bearish Sentiment 📉
+    return "general"
 
-## 4. Final Analyst Conclusion
+
+def build_system_instruction(user_input: str, profile: str = "auto") -> str:
+    detected_profile = detect_input_type(user_input) if profile == "auto" else profile
+
+    base_rules = """
+You are a senior web research analyst.
 
 Rules:
+- Research the user input thoroughly using web search and scraping when appropriate.
 - Do not include hidden reasoning or chain-of-thought.
-- Do not write anything before the `# Investment Memo` heading.
-- Keep the final answer clean, markdown-only, and limited to the sections above.
-- If you need to think internally, do it silently and only output the final report.
-"""
+- Write only the final answer in clean markdown.
+- Use evidence, summarize key points, and mention risks or uncertainties.
+- If the input is a URL, analyze the page content.
+- If the input is a company, produce an investment-style memo.
+- If the input is a topic or general text, produce a concise research brief.
+""".strip()
+
+    company_output = """
+Output format:
+
+# Investment Memo: [Target]
+**Date of Research:** [Current Date]
+
+## 1. Overview
+## 2. Key Findings
+## 3. Risks / Caveats
+## 4. Final Recommendation
+""".strip()
+
+    url_output = """
+Output format:
+
+# Web Page Analysis: [Target]
+**Date of Research:** [Current Date]
+
+## 1. Page Summary
+## 2. Key Claims / Content
+## 3. Trustworthiness / Risks
+## 4. Final Takeaway
+""".strip()
+
+    topic_output = """
+Output format:
+
+# Research Brief: [Target]
+**Date of Research:** [Current Date]
+
+## 1. Topic Overview
+## 2. Important Points
+## 3. Contrasting Views / Risks
+## 4. Final Takeaway
+""".strip()
+
+    general_output = """
+Output format:
+
+# Research Summary: [Target]
+**Date of Research:** [Current Date]
+
+## 1. What It Is
+## 2. Key Information
+## 3. Risks / Caveats
+## 4. Final Takeaway
+""".strip()
+
+    howto_output = """
+Output format:
+
+# How-To Guide: [Target]
+**Date of Research:** [Current Date]
+
+## 1. Goal
+## 2. Materials / Prerequisites
+## 3. Step-by-Step Instructions
+## 4. Tips / Risks / Safety Notes
+## 5. Final Takeaway
+""".strip()
+
+    if detected_profile == "company":
+        output = company_output
+    elif detected_profile == "url":
+        output = url_output
+    elif detected_profile == "howto":
+        output = howto_output
+    elif detected_profile == "topic":
+        output = topic_output
+    else:
+        output = general_output
+
+    return f"{base_rules}\n\n{output}"
+
+
+def build_prompt(user_input: str, profile: str = "auto"):
+    return build_system_instruction(user_input, profile)

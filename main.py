@@ -1,4 +1,5 @@
 from agent.agent import create_agent
+from agent.prompt import detect_input_type
 from html import escape
 import re
 
@@ -84,13 +85,14 @@ def _render_report_html(report_text):
             template = f.read()
         return template.replace("<!-- Report content will be inserted here -->", content_html)
 
-def run():
-        agent = create_agent()
 
-        company = input("Enter company name: ")
+def run():
+        user_input = input("Enter what you want to research: ")
+        profile = detect_input_type(user_input)
+        agent = create_agent(user_input, profile)
 
         result = agent.invoke({
-                "messages": [("user", company)]
+                "messages": [("user", user_input)]
         })
 
         final_answer = result["messages"][-1].content
@@ -98,7 +100,7 @@ def run():
         print("\n\n", report_text)
 
         html_report = _render_report_html(report_text)
-        report_file_name = _report_file_name(company)
+        report_file_name = _report_file_name(user_input)
         with open(report_file_name, "w", encoding="utf-8") as f:
                 f.write(html_report)
 
