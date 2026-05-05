@@ -3,6 +3,11 @@ from html import escape
 import re
 
 
+def _report_file_name(company_name):
+        safe_name = re.sub(r"[^a-zA-Z0-9]+", "-", company_name.strip().lower()).strip("-")
+        return f"report-{safe_name or 'report'}.html"
+
+
 def _extract_text(content):
         if isinstance(content, str):
                 return content
@@ -80,23 +85,24 @@ def _render_report_html(report_text):
         return template.replace("<!-- Report content will be inserted here -->", content_html)
 
 def run():
-    agent = create_agent()
+        agent = create_agent()
 
-    company = input("Enter company name: ")
+        company = input("Enter company name: ")
 
-    result = agent.invoke({
-        "messages": [("user", company)]
-    })
+        result = agent.invoke({
+                "messages": [("user", company)]
+        })
 
-    final_answer = result["messages"][-1].content
-    report_text = _extract_text(final_answer)
-    print("\n\n", report_text)
+        final_answer = result["messages"][-1].content
+        report_text = _extract_text(final_answer)
+        print("\n\n", report_text)
 
-    html_report = _render_report_html(report_text)
-    with open("report.html", "w", encoding="utf-8") as f:
-        f.write(html_report)
+        html_report = _render_report_html(report_text)
+        report_file_name = _report_file_name(company)
+        with open(report_file_name, "w", encoding="utf-8") as f:
+                f.write(html_report)
 
-    print("\nSaved HTML report to: report.html")
+        print(f"\nSaved HTML report to: {report_file_name}")
 
 
 if __name__ == "__main__":

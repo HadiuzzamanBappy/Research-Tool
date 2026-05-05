@@ -8,7 +8,7 @@ from main import _extract_text, _render_report_html
 
 st.set_page_config(page_title="Market Researcher", page_icon="📊", layout="wide")
 
-st.title("Market Researcher Web UI")
+st.title("Research tool")
 st.caption("Generate an investment memo for a company using Z.ai GLM-5 + web research tools.")
 
 company = st.text_input("Company name", placeholder="e.g. Microsoft")
@@ -22,6 +22,11 @@ if "result_text" not in st.session_state:
 
 if "report_html" not in st.session_state:
     st.session_state.report_html = ""
+
+
+def _report_file_name(company_name: str) -> str:
+    safe_name = re.sub(r"[^a-zA-Z0-9]+", "-", company_name.strip().lower()).strip("-")
+    return f"report-{safe_name or 'report'}.html"
 
 
 def _stream_with_split(agent, prompt: str):
@@ -131,7 +136,7 @@ if run:
                     st.download_button(
                         label="📥 Download HTML report",
                         data=st.session_state.report_html,
-                        file_name="report.html",
+                        file_name=_report_file_name(company),
                         mime="text/html",
                     )
                 elif thinking_text:
@@ -158,6 +163,6 @@ if not run and (st.session_state.thinking_text or st.session_state.result_text):
         st.download_button(
             label="📥 Download HTML report",
             data=st.session_state.report_html,
-            file_name="report.html",
+            file_name=_report_file_name(company) if company.strip() else "report.html",
             mime="text/html",
         )
