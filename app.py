@@ -83,14 +83,6 @@ def _typewriter(text: str):
         time.sleep(0.002)
 
 
-def _normalize_thinking_text(text: str) -> str:
-    """Collapse thinking whitespace so the live stream stays on one flowing line."""
-    text = text.replace("\u200b", "").replace("\ufeff", "")
-    text = re.sub(r"\s*\n+\s*", " ", text)
-    text = re.sub(r"[ \t]{2,}", " ", text)
-    return text.strip()
-
-
 if run:
     if not company.strip():
         st.warning("Please enter a company name.")
@@ -113,13 +105,8 @@ if run:
 
                 for chunk, is_final in _stream_with_split(agent, company.strip()):
                     if not is_final:
-                        thinking_chunk = _normalize_thinking_text(chunk)
-                        if thinking_chunk:
-                            if thinking_text and not thinking_text.endswith(" "):
-                                thinking_chunk = " " + thinking_chunk
-
-                            for character in _typewriter(thinking_chunk):
-                                thinking_text += character
+                        for character in _typewriter(chunk):
+                            thinking_text += character
                             st.session_state.thinking_text = thinking_text
                             with thinking_expander_container.container():
                                 with st.expander("🧠 Thinking Process", expanded=thinking_is_open):
