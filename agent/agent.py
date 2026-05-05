@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_openai import ChatOpenAI
 from langchain_core.messages import SystemMessage
 from langgraph.prebuilt import create_react_agent
 from agent.tools import web_search_tool, scrape_website
@@ -12,17 +12,21 @@ def create_agent():
     project_root = Path(__file__).resolve().parent.parent
     load_dotenv(project_root / ".env")
 
-    api_key = os.getenv("GEMINI_API_KEY")
+    api_key = os.getenv("ZAI_API_KEY")
     if not api_key:
         raise ValueError(
-            "Missing Gemini API key. Set GEMINI_API_KEY or GOOGLE_API_KEY "
-            "in your shell, .env, or .env.local"
+            "Missing Z.ai API key. Set ZAI_API_KEY "
+            "in your shell, .env, or environment variable"
         )
 
-    llm = ChatGoogleGenerativeAI(
-        model="gemini-2.5-flash",
+    # Set the environment variable so ChatOpenAI picks it up automatically
+    os.environ["OPENAI_API_KEY"] = api_key
+
+    llm = ChatOpenAI(
+        model="glm-4.6",
         temperature=0,
-        google_api_key=api_key
+        base_url="https://api.z.ai/api/coding/paas/v4",
+        streaming=True
     )
 
     system_message = SystemMessage(content=system_instruction)

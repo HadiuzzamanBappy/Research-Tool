@@ -1,28 +1,48 @@
-# 🤖 Autonomous Market Researcher Agent
+# Market Researcher
 
-An AI agent that researches companies and generates investment insights using real-time data.
+An AI market research agent that gathers live web data and generates a structured investment memo for a company.
 
-## 🚀 Features
+## Features
 
 - Web search using DuckDuckGo
-- Website scraping
-- Bullish & Bearish sentiment analysis
-- Structured Investment Memo output
+- Website scraping with BeautifulSoup
+- Bullish and bearish sentiment analysis
+- Streamed thinking and final result in the web UI
+- Markdown-to-HTML export for the final report
 
-## 🛠 Tech Stack
+## Tech Stack
 
 - LangChain
 - LangGraph
-- Gemini (LLM)
+- Z.ai GLM-4.6 via the OpenAI-compatible client
+- Streamlit
 - Python
 
-## ⚙️ Setup
+## Setup
 
-```bash
-git clone https://github.com/your-username/autonomous-market-researcher.git
-cd autonomous-market-researcher
-pip install -r requirements.txt
-set GEMINI_API_KEY=your_api_key_here
+```powershell
+git clone https://github.com/HadiuzzamanBappy/Research-Tool.git
+cd Research-Tool
+python -m pip install -r requirements.txt
+set ZAI_API_KEY=your_z_ai_api_key_here
+```
 
+## Run the CLI
+
+```powershell
 python main.py
 ```
+
+## Run the Web UI
+
+```powershell
+streamlit run app.py
+```
+
+The app will open in your browser, usually at `http://localhost:8501`.
+
+## Output
+
+- The web UI shows the thinking stream separately from the final memo.
+- The final memo can be downloaded as HTML using the built-in export.
+- The HTML export uses proper Markdown rendering, including bold text, headings, and lists.

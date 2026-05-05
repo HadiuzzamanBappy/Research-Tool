@@ -1,4 +1,4 @@
-langchain-google-genai
+langchain-openai
 langchain_community
 langgraph
 duckduckgo-search
@@ -6,3 +6,4 @@ ddgs
 beautifulsoup4
 requests
 python-dotenv
+streamlit

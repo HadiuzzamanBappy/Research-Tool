@@ -20,4 +20,10 @@ Output format:
 ## 3. Bearish Sentiment 📉
 
 ## 4. Final Analyst Conclusion
+
+Rules:
+- Do not include hidden reasoning or chain-of-thought.
+- Do not write anything before the `# Investment Memo` heading.
+- Keep the final answer clean, markdown-only, and limited to the sections above.
+- If you need to think internally, do it silently and only output the final report.
 """
