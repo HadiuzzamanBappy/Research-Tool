@@ -1,5 +1,6 @@
 from agent.agent import create_agent
 from html import escape
+import re
 
 
 def _extract_text(content):
@@ -22,6 +23,12 @@ def _markdownish_to_html(text):
         html_parts = []
         in_list = False
 
+        def _inline_markup(value):
+                escaped = escape(value)
+                escaped = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", escaped)
+                escaped = re.sub(r"__(.+?)__", r"<strong>\1</strong>", escaped)
+                return escaped
+
         for raw_line in lines:
                 line = raw_line.strip()
 
@@ -35,28 +42,28 @@ def _markdownish_to_html(text):
                         if in_list:
                                 html_parts.append("</ul>")
                                 in_list = False
-                        html_parts.append(f"<h1>{escape(line[2:].strip())}</h1>")
+                        html_parts.append(f"<h1>{_inline_markup(line[2:].strip())}</h1>")
                         continue
 
                 if line.startswith("## "):
                         if in_list:
                                 html_parts.append("</ul>")
                                 in_list = False
-                        html_parts.append(f"<h2>{escape(line[3:].strip())}</h2>")
+                        html_parts.append(f"<h2>{_inline_markup(line[3:].strip())}</h2>")
                         continue
 
                 if line.startswith("- ") or line.startswith("* "):
                         if not in_list:
                                 html_parts.append("<ul>")
                                 in_list = True
-                        html_parts.append(f"<li>{escape(line[2:].strip())}</li>")
+                        html_parts.append(f"<li>{_inline_markup(line[2:].strip())}</li>")
                         continue
 
                 if in_list:
                         html_parts.append("</ul>")
                         in_list = False
 
-                html_parts.append(f"<p>{escape(line)}</p>")
+                html_parts.append(f"<p>{_inline_markup(line)}</p>")
 
         if in_list:
                 html_parts.append("</ul>")

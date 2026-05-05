@@ -1,4 +1,5 @@
 import re
+import time
 import streamlit as st
 
 from agent.agent import create_agent
@@ -12,6 +13,15 @@ st.caption("Generate an investment memo for a company using Z.ai GLM-5 + web res
 
 company = st.text_input("Company name", placeholder="e.g. Microsoft")
 run = st.button("Run Research", type="primary")
+
+if "thinking_text" not in st.session_state:
+    st.session_state.thinking_text = ""
+
+if "result_text" not in st.session_state:
+    st.session_state.result_text = ""
+
+if "report_html" not in st.session_state:
+    st.session_state.report_html = ""
 
 
 def _stream_with_split(agent, prompt: str):
@@ -66,68 +76,101 @@ def _stream_with_split(agent, prompt: str):
         yield chunk_text, seen_marker
 
 
+def _typewriter(text: str):
+    """Yield text one character at a time for a chat-like typing effect."""
+    for character in text:
+        yield character
+        time.sleep(0.002)
+
+
+def _normalize_thinking_text(text: str) -> str:
+    """Collapse thinking whitespace so the live stream stays on one flowing line."""
+    text = text.replace("\u200b", "").replace("\ufeff", "")
+    text = re.sub(r"\s*\n+\s*", " ", text)
+    text = re.sub(r"[ \t]{2,}", " ", text)
+    return text.strip()
+
+
 if run:
     if not company.strip():
         st.warning("Please enter a company name.")
     else:
         try:
+            st.session_state.thinking_text = ""
+            st.session_state.result_text = ""
+            st.session_state.report_html = ""
+
             agent = create_agent()
-            
+
             st.info("🔍 Researching...")
-            
+
             try:
                 thinking_text = ""
                 result_text = ""
-                thinking_done = False
-                result_started = False
-                
-                # Thinking expander (will stream into it)
                 thinking_expander_container = st.empty()
                 result_container = st.empty()
-                
-                # Stream everything live
+                thinking_is_open = True
+
                 for chunk, is_final in _stream_with_split(agent, company.strip()):
                     if not is_final:
-                        # THINKING portion: raw text, stream into expander
-                        thinking_text += chunk
-                        with thinking_expander_container.container():
-                            with st.expander("🧠 Thinking Process", expanded=True):
-                                st.text(thinking_text)
-                        thinking_done = False
+                        thinking_chunk = _normalize_thinking_text(chunk)
+                        if thinking_chunk:
+                            if thinking_text and not thinking_text.endswith(" "):
+                                thinking_chunk = " " + thinking_chunk
+
+                            for character in _typewriter(thinking_chunk):
+                                thinking_text += character
+                            st.session_state.thinking_text = thinking_text
+                            with thinking_expander_container.container():
+                                with st.expander("🧠 Thinking Process", expanded=thinking_is_open):
+                                    st.text(thinking_text)
                     else:
-                        # RESULT portion: formatted markdown, stream with styling
-                        # Once we switch to result, collapse thinking expander
-                        if not thinking_done:
-                            thinking_done = True
-                            # Show thinking in collapsed expander
+                        if thinking_is_open:
+                            thinking_is_open = False
                             with thinking_expander_container.container():
                                 with st.expander("🧠 Thinking Process", expanded=False):
                                     st.text(thinking_text)
-                        
-                        # Stream result with markdown formatting in real-time
-                        result_text += chunk
-                        with result_container.container():
-                            st.markdown(result_text)
-                        result_started = True
-                
-                # Final display
+
+                        for character in _typewriter(chunk):
+                            result_text += character
+                            st.session_state.result_text = result_text
+                            result_container.markdown(result_text)
+
                 if result_text:
                     st.success("✅ Research complete")
-                    
-                    html_report = _render_report_html(result_text)
+                    st.session_state.thinking_text = thinking_text
+                    st.session_state.result_text = result_text
+                    st.session_state.report_html = _render_report_html(result_text)
                     st.download_button(
                         label="📥 Download HTML report",
-                        data=html_report,
+                        data=st.session_state.report_html,
                         file_name="report.html",
                         mime="text/html",
                     )
                 elif thinking_text:
                     st.success("✅ Research complete")
-                    
+                    st.session_state.thinking_text = thinking_text
+
             except Exception as stream_err:
                 st.error(f"Streaming error: {stream_err}")
                 st.info("Tip: Check if your Z.ai account has sufficient balance/quota. Visit z.ai/manage-apikey/billing")
                 st.stop()
-            
+
         except Exception as exc:
             st.error(f"Failed to run research: {exc}")
+
+if not run and (st.session_state.thinking_text or st.session_state.result_text):
+    if st.session_state.thinking_text:
+        with st.expander("🧠 Thinking Process", expanded=False):
+            st.text(st.session_state.thinking_text)
+
+    if st.session_state.result_text:
+        st.markdown(st.session_state.result_text)
+
+    if st.session_state.report_html:
+        st.download_button(
+            label="📥 Download HTML report",
+            data=st.session_state.report_html,
+            file_name="report.html",
+            mime="text/html",
+        )
