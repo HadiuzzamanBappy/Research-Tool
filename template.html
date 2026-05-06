@@ -4,78 +4,146 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Investment Memo</title>
+    <title>Investment Memo | Research Tool</title>
+    
+    <!-- Professional Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Hind+Siliguri:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
     <style>
         :root {
-            --bg: #f7f8fc;
+            --bg: #f8fafc;
             --panel: #ffffff;
-            --text: #1c2430;
-            --muted: #5a6677;
-            --accent: #0b6bcb;
-            --border: #dbe3ef;
+            --text: #1e293b;
+            --muted: #64748b;
+            --accent: #2563eb;
+            --border: #e2e8f0;
+            --font-family: 'Outfit', 'Hind Siliguri', -apple-system, BlinkMacSystemFont, sans-serif;
         }
 
         * {
             box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
-            margin: 0;
-            font-family: Segoe UI, -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: var(--font-family);
+            background: radial-gradient(circle at top right, #eff6ff 0%, var(--bg) 100%);
             color: var(--text);
-            background: radial-gradient(circle at top right, #dceeff 0%, var(--bg) 55%);
             line-height: 1.6;
+            min-height: 100vh;
+            padding: 40px 20px;
         }
 
         .wrap {
             max-width: 900px;
-            margin: 40px auto;
-            padding: 0 16px;
+            margin: 0 auto;
         }
 
         .card {
             background: var(--panel);
             border: 1px solid var(--border);
             border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(8, 24, 44, 0.08);
-            padding: 28px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            padding: 48px;
         }
 
         h1 {
-            margin: 0 0 18px;
-            font-size: 1.8rem;
-            color: var(--accent);
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 24px;
+            letter-spacing: -0.02em;
+            line-height: 1.2;
         }
 
         h2 {
-            margin: 22px 0 10px;
-            font-size: 1.2rem;
-            color: #0e2f55;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 6px;
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin: 32px 0 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #f1f5f9;
+            line-height: 1.3;
+        }
+
+        h3 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: var(--text);
+            margin: 24px 0 10px;
+            line-height: 1.3;
         }
 
         p {
-            margin: 10px 0;
+            margin-bottom: 16px;
             color: var(--muted);
+            font-size: 1.05rem;
         }
 
         ul {
-            margin: 8px 0 12px 22px;
+            margin: 16px 0 24px 20px;
+            list-style-type: none;
         }
 
         li {
-            margin: 6px 0;
+            position: relative;
+            margin-bottom: 10px;
+            padding-left: 24px;
+            color: var(--muted);
+        }
+
+        li::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 10px;
+            width: 6px;
+            height: 6px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+
+        strong {
+            color: var(--text);
+            font-weight: 600;
         }
 
         .content {
-            min-height: 200px;
+            min-height: 300px;
         }
 
         .foot {
-            margin-top: 20px;
+            margin-top: 40px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+            text-align: center;
             font-size: 0.9rem;
-            color: #74839a;
+            color: var(--muted);
+        }
+
+        .foot b {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        /* Bengali text optimizations */
+        [lang="bn"] {
+            line-height: 1.8;
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 20px 10px;
+            }
+            .card {
+                padding: 28px;
+            }
+            h1 {
+                font-size: 1.8rem;
+            }
         }
     </style>
 </head>
@@ -83,10 +151,10 @@
 <body>
     <main class="wrap">
         <section class="card">
-            <div class="content">
+            <div class="content" id="report-content">
                 <!-- Report content will be inserted here -->
             </div>
-            <div class="foot">Generated by Market Researcher</div>
+            <div class="foot">Generated by <b>Market Researcher AI</b></div>
         </section>
     </main>
 </body>

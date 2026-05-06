@@ -58,6 +58,13 @@ def _markdownish_to_html(text):
                         html_parts.append(f"<h2>{_inline_markup(line[3:].strip())}</h2>")
                         continue
 
+                if line.startswith("### "):
+                        if in_list:
+                                html_parts.append("</ul>")
+                                in_list = False
+                        html_parts.append(f"<h3>{_inline_markup(line[4:].strip())}</h3>")
+                        continue
+
                 if line.startswith("- ") or line.startswith("* "):
                         if not in_list:
                                 html_parts.append("<ul>")

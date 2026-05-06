@@ -19,7 +19,7 @@ def detect_input_type(user_input: str) -> str:
     return "general"
 
 
-def build_system_instruction(user_input: str, profile: str = "auto") -> str:
+def build_system_instruction(user_input: str, profile: str = "auto", language: str = "English") -> str:
     detected_profile = detect_input_type(user_input) if profile == "auto" else profile
 
     base_rules = """
@@ -33,7 +33,8 @@ Rules:
 - If the input is a URL, analyze the page content.
 - If the input is a company, produce an investment-style memo.
 - If the input is a topic or general text, produce a concise research brief.
-""".strip()
+- CRITICAL: Write the entire report (including all headers and content) in {language}.
+""".strip().format(language=language)
 
     company_output = """
 Output format:
@@ -110,5 +111,5 @@ Output format:
     return f"{base_rules}\n\n{output}"
 
 
-def build_prompt(user_input: str, profile: str = "auto"):
-    return build_system_instruction(user_input, profile)
+def build_prompt(user_input: str, profile: str = "auto", language: str = "English"):
+    return build_system_instruction(user_input, profile, language)

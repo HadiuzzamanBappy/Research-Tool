@@ -12,13 +12,16 @@ st.set_page_config(page_title="Market Researcher", page_icon="📊", layout="wid
 st.title("Research tool")
 st.caption("Research companies, topics, URLs, and general inputs with live web research tools.")
 
-col_sel, col_input, col_run = st.columns([1, 6, 1])
-with col_sel:
+# Single row layout
+col_type, col_input, col_lang, col_run = st.columns([1.2, 5, 1.2, 1.3])
+
+with col_type:
     selection = st.selectbox(
         "Input type",
         options=["Auto", "Company", "URL", "Topic", "How to"],
         index=0,
         help="Choose how to interpret the input. 'Auto' will detect type automatically.",
+        label_visibility="collapsed"
     )
 
 with col_input:
@@ -35,7 +38,16 @@ with col_input:
     else:
         placeholder = "Enter what you want researched"
 
-    company = st.text_input("What should the agent research?", placeholder=placeholder)
+    company = st.text_input("What should the agent research?", placeholder=placeholder, label_visibility="collapsed")
+
+with col_lang:
+    language = st.selectbox(
+        "Language",
+        options=["English", "Bengali"],
+        index=0,
+        help="The language of the final research report.",
+        label_visibility="collapsed"
+    )
 
 with col_run:
     st.markdown(
@@ -49,10 +61,16 @@ with col_run:
         div.stButton > button {
             box-shadow: 0 0 10px rgba(0,150,255,0.45);
             transition: box-shadow 0.18s ease-in-out, transform 0.08s;
+            width: 100%;
+            height: 38px;
         }
         div.stButton > button:hover {
             box-shadow: 0 0 22px rgba(0,150,255,0.75);
             transform: translateY(-1px);
+        }
+        /* Align inputs vertically */
+        .stSelectbox, .stTextInput {
+            margin-bottom: 0px;
         }
         </style>
         """,
@@ -140,7 +158,7 @@ if run:
             profile = selection.lower() if selection != "Auto" else detect_input_type(company)
             if profile == "how to":
                 profile = "howto"
-            agent = create_agent(company, profile)
+            agent = create_agent(company, profile, language)
 
             st.info(f"🔍 Researching ({profile})...")
 
@@ -157,13 +175,13 @@ if run:
                             thinking_text += character
                             st.session_state.thinking_text = thinking_text
                             with thinking_expander_container.container():
-                                with st.expander("🧠 Thinking Process", expanded=thinking_is_open):
+                                with st.expander("🧠 Researching", expanded=thinking_is_open):
                                     st.text(thinking_text)
                     else:
                         if thinking_is_open:
                             thinking_is_open = False
                             with thinking_expander_container.container():
-                                with st.expander("🧠 Thinking Process", expanded=False):
+                                with st.expander("🧠 Researching", expanded=False):
                                     st.text(thinking_text)
 
                         for character in _typewriter(chunk):
@@ -196,7 +214,7 @@ if run:
 
 if not run and (st.session_state.thinking_text or st.session_state.result_text):
     if st.session_state.thinking_text:
-        with st.expander("🧠 Thinking Process", expanded=False):
+        with st.expander("🧠 Researching", expanded=False):
             st.text(st.session_state.thinking_text)
 
     if st.session_state.result_text:

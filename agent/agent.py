@@ -8,7 +8,7 @@ from agent.tools import web_search_tool, scrape_website
 from agent.prompt import build_prompt
 
 
-def create_agent(user_input: str, profile: str = "auto"):
+def create_agent(user_input: str, profile: str = "auto", language: str = "English"):
     # Load .env if present so keys work without shell exports.
     project_root = Path(__file__).resolve().parent.parent
     load_dotenv(project_root / ".env")
@@ -30,7 +30,7 @@ def create_agent(user_input: str, profile: str = "auto"):
         streaming=True,
     )
 
-    system_message = SystemMessage(content=build_prompt(user_input, profile))
+    system_message = SystemMessage(content=build_prompt(user_input, profile, language))
 
     agent = create_react_agent(
         llm,

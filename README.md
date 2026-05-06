@@ -1,48 +1,92 @@
-# Market Researcher
+# 📊 Market Researcher AI
 
-An AI market research agent that gathers live web data and generates a structured investment memo for a company.
+An advanced agentic research tool that gathers live web data, performs sentiment analysis, and generates structured, high-end Investment Memos.
 
-## Features
+## ✨ Features
 
-- Web search using DuckDuckGo
-- Website scraping with BeautifulSoup
-- Bullish and bearish sentiment analysis
-- Streamed thinking and final result in the web UI
-- Markdown-to-HTML export for the final report
+- **Agentic Research**: Powered by LangGraph for multi-step reasoning and search.
+- **Live Web Access**: Real-time searching via DuckDuckGo and deep scraping with BeautifulSoup.
+- **Sentiment Analysis**: Automated bullish and bearish perspective generation.
+- **Antigravity UI**: Premium glassmorphism-based HTML reports with smooth GSAP animations and 3D depth.
+- **Dual Interface**: Choose between a high-density Streamlit Web UI or a lean CLI.
+- **Export Ready**: Download beautiful, self-contained HTML reports for stakeholders.
 
-## Tech Stack
+## 🛠️ Tech Stack
 
-- LangChain
-- LangGraph
-- Z.ai GLM-4.6 via the OpenAI-compatible client
-- Streamlit
-- Python
+- **Framework**: LangChain & LangGraph
+- **Intelligence**: Z.ai GLM-4.6 (OpenAI-compatible)
+- **Interface**: Streamlit
+- **Animations**: GSAP (GreenSock)
+- **Styling**: CSS Glassmorphism & Custom 3D Transforms
 
-## Setup
+## 🚀 Getting Started
+
+Follow these steps to set up the project on your local machine.
+
+### 1. Clone the Repository
 
 ```powershell
 git clone https://github.com/HadiuzzamanBappy/Research-Tool.git
 cd Research-Tool
-python -m pip install -r requirements.txt
-set ZAI_API_KEY=your_z_ai_api_key_here
 ```
 
-## Run the CLI
+### 2. Create and Activate Virtual Environment
+
+**Windows:**
 
 ```powershell
-python main.py
+python -m venv venv
+.\venv\Scripts\activate
 ```
 
-## Run the Web UI
+**macOS/Linux:**
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+### 3. Install Dependencies
+
+```powershell
+pip install -r requirements.txt
+```
+
+### 4. Configuration
+
+Create a `.env` file in the root directory (you can copy `.env.local` if it exists):
+
+```env
+OPENAI_API_KEY=your_api_key_here
+OPENAI_BASE_URL=https://api.z.ai/v1  # If using Z.ai
+```
+
+## 🎮 How to Run
+
+### Web Dashboard (Recommended)
+
+This provides a real-time "Thinking Stream" and interactive report preview.
 
 ```powershell
 streamlit run app.py
 ```
 
-The app will open in your browser, usually at `http://localhost:8501`.
+### Command Line Interface
 
-## Output
+For quick, terminal-based research.
 
-- The web UI shows the thinking stream separately from the final memo.
-- The final memo can be downloaded as HTML using the built-in export.
-- The HTML export uses proper Markdown rendering, including bold text, headings, and lists.
+```powershell
+python main.py
+```
+
+## 📄 Output & Exports
+
+The tool generates **"Investment Memos"** designed with the **Antigravity Design System**. These reports feature:
+
+- **Glassmorphism**: Sophisticated translucent surfaces.
+- **Motion Design**: Staggered entrance animations for content.
+- **Interactive Depth**: 3D tilt effects on mouse hover.
+- **Self-Contained**: All styles and scripts are embedded in a single HTML file for easy sharing.
+
+---
+Developed by [Hadiuzzaman Bappy](https://github.com/HadiuzzamanBappy)
